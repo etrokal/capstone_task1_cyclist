@@ -1,0 +1,90 @@
+---
+title: "cyclist_market_analisys_report"
+author: "Marcelo Duarte da Silva"
+date: "04/08/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(skimr)
+library(janitor)
+
+```
+
+## Introduction
+
+This report contains the market analysis of the costumers of **Cyclist** ride share company. This company is fictitious, and this report is part of the capstone project of the Google Data Analytics Professional Certificate. 
+
+## Business Task
+
+This report explores the differences in bike use between annual members a casual riders of the **Cyclist** bike sharing app.
+
+## Objectives
+
+- Compare bike use behavior between annual members and casual riders, in order to identify trends.
+- Compare socioeconomic metrics of the customers, in order to better understand 
+the differences in behavior of the two groups, if they exist.
+
+## Preparing the data
+
+The analysis used data from **Divvy Bikes** as proxy data. **Divvy Bikes** is a bike sharing company from Chicago and their data is licensed as [public domain](https://www.divvybikes.com/data-license-agreement).
+
+The data used comprise costumer data from 2013 up to June/2021.
+
+### Datasets
+
+The datasets were obtained from [this download page](https://divvy-tripdata.s3.amazonaws.com/index.html), in 2021-08-4. The raw data is comprised of of 33 datasets available for download as of the date mentioned.
+
+The first step in our data preparation is to combine these datasets in a single dataset with all the data.
+
+
+
+``` {r, include=FALSE}
+# loading each dataset before combining them all in one
+
+load_and_clean <- function(path) {
+  result <- readr::read_csv(path) %>% 
+    janitor::clean_names() %>% 
+    janitor::remove_empty()
+  
+  return(result)
+}
+
+# data from 2021
+df_202106 <- load_and_clean("./raw_data/202106-divvy-tripdata/202106-divvy-tripdata.csv")
+
+df_202105 <- load_and_clean("./raw_data/202105-divvy-tripdata/202105-divvy-tripdata.csv") 
+
+df_202104 <- load_and_clean("./raw_data/202104-divvy-tripdata/202104-divvy-tripdata.csv")
+
+
+
+#glimpse(final_df)
+
+#skimr::skim(df_202105)
+#glimpse(df_202105)
+#View(df_202105)
+
+# combining the datasets in a single one, and saving to disk
+# from here on we will use this combined dataset
+final_df <- df_202106
+rm(df_202106)
+final_df <- bind_rows(final_df, df_202105)
+rm(df_202105)
+
+glimpse(final_df)
+
+```
+
+## Analysis
+
+How many rides per day?
+
+What is the average ride length (include by year comparision) ? Whats is the average length in the morning, in the afternoon and at night? What about per rideable_type?
+
+
+What is the most common time of the day for rides, morning, afternoon or night? What about the rideable_type
+
