@@ -1,28 +1,18 @@
 ---
-title: "cyclist_market_analisys_report"
+title: "Cyclist Market Analisys Report"
 author: "Marcelo Duarte da Silva"
 date: "04/08/2021"
-output:
+output: 
   pdf_document: default
-  html_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-
-Sys.setlocale("LC_TIME", "English")
-
-library(tidyverse)
-library(skimr)
-library(janitor)
-
-oldw <- getOption("warn")
 ```
 
 ## Introduction
 
-This report contains the market analysis of the customers of **Cyclist** ride share company. This company is fictitious, and this report is part of the capstone project of the Google Data Analytics Professional Certificate. 
-
+This report contains the market analysis of the customers of **Cyclist** ride share company. This company is fictitious, and this report is part of the capstone project of the Google Data Analytics Professional Certificate.
 
 ## Business Task
 
@@ -30,15 +20,12 @@ This report explores the differences in bike use between annual members a casual
 
 ## Objectives
 
-- Compare bike use behavior between annual members and casual riders, in order to identify trends.
-- Elect and compare metrics, in order to better understand the differences in behavior of the two groups of customers, if they exist.
-
+-   Compare bike use behavior between annual members and casual riders, in order to identify trends.
+-   Elect and compare metrics, in order to better understand the differences in behavior of the two groups of customers, if they exist.
 
 ## Preparing the data
 
 The analysis used data from **Divvy Bikes** as proxy data. **Divvy Bikes** is a bike sharing company from Chicago and their data is licensed as [public domain](https://www.divvybikes.com/data-license-agreement).
-
-The data obtained comprise customer trips data from 2013 up to June/2021. In order to make a more relevant analysis, we chose to only use the data from the last 5 years.
 
 
 ### Datasets
@@ -50,29 +37,35 @@ The datasets were obtained from [this download page](https://divvy-tripdata.s3.a
 
 I used **R language** and **RStudio** to do the entire analysis of this project. **R** is considered to be a very flexible and capable instrument for data analysis, and contains all the tools needed to fulfill the listed objectives.
 
-The first step in the data processing was to combine these datasets in a single dataset containing all the data. Then, we saved the data into a single dataset. 
+The first step in the data processing was to combine these datasets in a single dataset containing all the data. Then, we saved the data into a single dataset.
 
-While combining the data, we had to rename and reformat values in the columns of the datasets from 2019 and older. These datasets have a different format compared to those from 2020 and earlier. We used the structure from the newer datasets as a baseline, because it contained some new information not present in the older ones. The most relevant addition is the geographical coordinates of the start and end of the ride. 
-
+While combining the data, we had to rename and reformat values in the columns of the datasets from 2019 and older. These datasets have a different format compared to those from 2020 and earlier. We used the structure from the newer datasets as a baseline, because it contained some new information not present in the older ones. The most relevant addition is the geographical coordinates of the start and end of the ride.
 
 ## Analysis
 
 In order to start our analysis, I elected some metrics to compare between annual members and casual riders, based on the data available. The metrics are the following:
 
-- Ride time;
-- Ride frequency;
-- Ride amount.
+-   Ride time;
+-   Ride frequency;
+-   Ride amount.
 
-I chose to create an aggregated metric called *Ride Amount* calculated as the simple product of the average *ride time* and the daily *ride frequency*. 
+I chose to create an aggregated metric called *Ride Amount* calculated as the simple product of the average *ride time* and the daily *ride frequency*.
 
-These metrics were analyzed and checked for seasonal trends in biker behavior, comparing differences based on period of the day (morning, afternoon and night), and differences during the year. 
+These metrics were analyzed and checked for seasonal trends in biker behavior, comparing differences based on period of the day (morning, afternoon and night), and differences during the year.
 
-Initially I tried to calculate the ride length, by using the geographical coordinates. But, examining the data it turned out the these coordinates could not be used for this purpose. There was a very low correlation between ride time and ride length, with an `r = 0.23`. The probable explanation is that riders sometimes don't ride linearly between the starting point (or station) and the ending point. A rider, for instance, could start a trip, go somewhere and then return to end the trip at the same station. For this reason we will not consider the geographical coordinates.
+Initially I tried to calculate the ride length, by using the geographical coordinates. But, examining the data it turned out the these coordinates could not be used for this purpose. There was a very low correlation between ride time and ride length, with an *R = 0.23*. The probable explanation is that riders sometimes don't ride linearly between the starting point (or station) and the ending point. A rider, for instance, could start a trip, go somewhere and then return to end the trip at the same station. For this reason we will not consider the geographical coordinates.
 
 We filtered out trips with missing start or end times. We also filtered out trips in which the start time was greater than the end time and trips with more than 12 hour duration, because they are not a good indicator of ride times since the bikes most likely were not being used by the customer for all that time.
 
+```{r include = FALSE}
 
-```{r loading_and_formating_data, include = FALSE}
+Sys.setlocale("LC_TIME", "English")
+
+library(tidyverse)
+library(skimr)
+library(janitor)
+
+oldw <- getOption("warn")
 
 cyclist_data <- read_csv(
   "./cleaned_up_data/cyclist_data.csv",
@@ -131,12 +124,6 @@ summ_baseline <- cyclist_data %>%
     daily_ride_frequency = mean(daily_ride_frequency)
   )
   
-
-  
-  
-#avg_ride_time <- mean(cyclist_data$ride_time_min)
-#avg_ride_time
-
 gc()
 
 
@@ -146,7 +133,7 @@ gc()
 
 First I established a baseline of values by finding the average ride time and the frequency of daily rides.
 
-```{r }
+```{r echo = FALSE}
 ggplot(summ_baseline) +
   geom_col(mapping=aes(x=year, y=avg_ride_time_min, fill=year)) +
   labs(title="Yearly average ride time", fill="Year") +
@@ -160,20 +147,18 @@ The average ride time across the five years of the analysis is 21.3 minutes. It 
 
 There was a very sharp time increase in the average ride time in 2018, compared to 2017. The available data is not enough to provide a reason for this. It is necessary further exploration to better understand this effect.
 
-
-```{r }
+```{r echo = F}
 ggplot(summ_baseline) +
   geom_col(mapping=aes(x=year, y=daily_ride_frequency, fill=year)) +
-  labs(title="Yearly mean daily rides", fill="Year") +
+  labs(title="Average number of daily rides", fill="Year") +
   xlab(NULL) +
   ylab("Average number of rides (daily)")
 
 ```
 
-The next step is start the exploration of the metrics in individual customer groups.  
+The next step is start the exploration of the metrics in individual customer groups.
 
-
-```{r, include = FALSE }
+```{r include = FALSE }
 
 summ_customer <- cyclist_data %>% 
   group_by(year, month, month_digit, ride_date, member_casual) %>% 
@@ -191,8 +176,7 @@ summ_customer <- cyclist_data %>%
 
 ```
 
-
-```{r}
+```{r echo = F}
 
 
 ggplot(summ_customer) + 
@@ -200,45 +184,51 @@ ggplot(summ_customer) +
   facet_wrap(~year) +
   labs(title="Average ride time by year", color="Rider") +
   xlab(NULL) +
-  ylab("Average ride time (minutes)")
-  
-
+  ylab("Average ride time (minutes)") +
+  theme(axis.text.x = element_text(angle = 60, margin = margin(t=5,r=5), size=8) )
 ```
 
 The data shows that casual riders have an average ride time greater than members, on all years of the analysis. The data shows a trend of increased ride time during the summer. This increase is more pronounced in casual riders, compared to members.
 
 The year 2020 showed an increase in ride times from members, and there was a general increase in ride time from casual riders between 2018 and 2020. It is not possible to posit a reason for this behavior using only the available date.
 
-``` {r }
+```{r echo = F}
 ggplot(summ_customer) + 
-  geom_path(mapping=aes(x=month, y=daily_ride_frequency , group=member_casual, color=member_casual), size=1) +
+  geom_path(
+    mapping=aes(
+      x=month, 
+      y=daily_ride_frequency, 
+      group=member_casual, 
+      color=member_casual
+    ), 
+    size=1) +
   facet_wrap(~year) +
   labs(title="Average daily ride frequency by year", color="Rider") +
   xlab(NULL) +
-  ylab("Daily ride frequency")
+  ylab("Daily ride frequency") +
+  theme(axis.text.x = element_text(angle = 60, margin = margin(t=5,r=5), size=8))
 
 ```
 
-It is possible see that the data shows a different trend in regards to average daily ride frequency. Members, on average have a much higher average number of rides than non members. It is also possible to verify that the number of rides increase during the Summer. 
+It is possible see that the data shows a different trend in regards to average daily ride frequency. Members, on average have a much higher average number of rides than non members. It is also possible to verify that the number of rides increase during the Summer.
 
-In 2020, the trend changed a bit. The frequency of rides of casual customers  increased and the number from members decreased, to the point of being very similar. This trend repeated on the first half of 2021.
+In 2020, the trend changed a bit. The frequency of rides of casual customers increased and the number from members decreased, to the point of being very similar. This trend repeated on the first half of 2021.
 
-
-``` {r }
+```{r echo = F}
 
 ggplot(summ_customer) +
   geom_path(mapping=aes(x=month, y=ride_amount, group=member_casual, color=member_casual), size=1) +
   facet_wrap(~year) +
   labs(title="Ride amount by year", color="Rider") +
   xlab(NULL) +
-  ylab("Ride amount")
-
+  ylab("Ride amount") +
+  theme(axis.text.x = element_text(angle = 60, margin = margin(t=5,r=5), size=8))
 
 ```
 
 When analyzing the *ride amount* aggregated metric, we can see that in most of the years of the analysis, casual riders and members showed similar ride amounts. With a slight increase from casual riders in 2019 during summer and early autumn. This difference became bigger in 2020 and, so far, 2021 is replicating the previous year tendency.
 
-``` {r, include=FALSE }
+```{r include=FALSE }
 
 summ_bike_type <- cyclist_data %>% 
   filter(!is.na(rideable_type)) %>% 
@@ -255,7 +245,7 @@ summ_bike_type <- cyclist_data %>%
 
 ```
 
-``` {r }
+```{r echo = F}
 ggplot(summ_bike_type) +
   geom_col(mapping=aes(x=rideable_type, y=type_frequency, fill=member_casual)) +
   facet_wrap(~year) +
@@ -270,9 +260,5 @@ Bike type data is only available starting in 2020. By analyzing the available da
 
 ## Recomendations
 
-1. Develop a service tier in order to monetize the increased ride time of casual users.
-2. Further investigate the reason for ride time increase in 2018.
-3. 
-
-
-
+1.  Develop a service tier in order to monetize the increased ride time of casual users.
+2.  Further investigate the reason for ride time increase in 2018.
